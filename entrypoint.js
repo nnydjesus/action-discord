@@ -30,42 +30,43 @@ _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 let url;
 let payload;
 var content = core.getInput('content', { required: false });
-var embeds = core.getInput('embeds', { required: false });
 
-const eventPayload =  JSON.parse(eventContent)
+const eventPayload = JSON.parse(eventContent)
 
-if (!content && !embeds ) {
-  // If argument NOT provided, let Discord show the event informations.
-  url = `${process.env.DISCORD_WEBHOOK}/github`;
-  payload = JSON.stringify(JSON.parse(eventContent));
-} else {
-  // Otherwise, if the argument is provided, let Discord override the message.
-  
-    console.log(JSON.stringify({content:content, embeds:embeds, eventPayload:eventPayload}))
+console.log(JSON.stringify({ content: content }))
 
-  if(content){
-    content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
-  }
-  
-  if(embeds){
-    embeds = JSON.parse(_.template(embeds)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
-
-    if(!embeds.fields){ embeds.fields = []}
-    _.forEach(eventPayload.commits, function(commit){
-      embeds.fields.push({name:"["+commit.url+"]("+commit.sha+")", "value":commit.message})
-    })  
-  }
-  
-  console.log(JSON.stringify({content:content, embeds:embeds}))
-
-  url = process.env.DISCORD_WEBHOOK;
-  payload = JSON.stringify({
-    content: content,
-    embeds: embeds,
-    ...process.env.DISCORD_USERNAME && { username: process.env.DISCORD_USERNAME },
-    ...process.env.DISCORD_AVATAR && { avatar_url: process.env.DISCORD_AVATAR },
-  });
+if (content) {
+  content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
 }
+
+var embed = {}
+
+embed.title = _.template(core.getInput('title'))({ ...process.env, EVENT_PAYLOAD: eventPayload });
+embed.description = _.template(core.getInput('description'))({ ...process.env, EVENT_PAYLOAD: eventPayload });
+embed.color = core.getInput('color');
+
+if (core.getInput('author')) {
+  embed.author = {
+    name: eventPayload.sender.login,
+    icon_url: eventPayload.sender.avatar_url,
+    url: eventPayload.sender.url
+  }
+}
+
+embed.fields = _.template(core.getInput('fields'))({ ...process.env, EVENT_PAYLOAD: eventPayload });
+
+if (!embed.fields) { embed.fields = [] }
+eventPayload.commits.forEach(commit => embed.fields.push({ name: "[" + commit.url + "](" + commit.sha + ")", "value": commit.message }))
+
+console.log(JSON.stringify({ content: content, embed: embed }))
+
+url = process.env.DISCORD_WEBHOOK;
+payload = JSON.stringify({
+  content: content,
+  embeds: [embed],
+  ...process.env.DISCORD_USERNAME && { username: process.env.DISCORD_USERNAME },
+  ...process.env.DISCORD_AVATAR && { avatar_url: process.env.DISCORD_AVATAR },
+});
 
 // curl -X POST -H "Content-Type: application/json" --data "$(cat $GITHUB_EVENT_PATH)" $DISCORD_WEBHOOK/github
 
