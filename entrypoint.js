@@ -43,7 +43,7 @@ if (!content && !embeds ) {
     content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
   }
   
-  if(content){
+  if(embeds){
     embeds = JSON.parse(_.template(embeds)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
   }
   
