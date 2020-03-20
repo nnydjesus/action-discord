@@ -41,7 +41,7 @@ if (!content && !embeds ) {
 } else {
   // Otherwise, if the argument is provided, let Discord override the message.
   
-    console.log(JSON.stringify({content:content, embeds:embeds}))
+    console.log(JSON.stringify({content:content, embeds:embeds, eventPayload:eventPayload}))
 
   if(content){
     content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
