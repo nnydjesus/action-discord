@@ -75,7 +75,7 @@ console.log({payload:payload})
 // curl -X POST -H "Content-Type: application/json" --data "$(cat $GITHUB_EVENT_PATH)" $DISCORD_WEBHOOK/github
 
 (async () => {
-  console.log('Sending message ...');
+  // console.log('Sending message ...');
   await axios.post(
     `${url}?wait=true`,
     payload,
@@ -86,7 +86,7 @@ console.log({payload:payload})
       },
     },
   );
-  console.log('Message sent ! Shutting down ...');
+  // console.log('Message sent ! Shutting down ...');
   process.exit(0);
 })().catch(err => {
   console.error('Error :', err.response.status, err.response.statusText);
