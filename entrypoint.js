@@ -53,7 +53,7 @@ if (core.getInput('author')) {
   }
 }
 
-embed.fields = _.template(core.getInput('fields'))({ ...process.env, EVENT_PAYLOAD: eventPayload });
+embed.fields = JSON.parse(_.template(core.getInput('fields'))({ ...process.env, EVENT_PAYLOAD: eventPayload }));
 
 if (!embed.fields) { embed.fields = [] }
 eventPayload.commits.forEach(commit => embed.fields.push({ name: "[" + commit.url + "](" + commit.sha + ")", "value": commit.message }))
