@@ -36,11 +36,11 @@ if (argv._.length === 0) {
 } else {
   // Otherwise, if the argument is provided, let Discord override the message.
   const args = argv._.join(' ');
-  const message = _.template(args)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) });
+  const message = JSON.parse(_.template(args)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
 
   url = process.env.DISCORD_WEBHOOK;
   payload = JSON.stringify({
-    content: message,
+    embeds: message,
     ...process.env.DISCORD_USERNAME && { username: process.env.DISCORD_USERNAME },
     ...process.env.DISCORD_AVATAR && { avatar_url: process.env.DISCORD_AVATAR },
   });
