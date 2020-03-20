@@ -49,14 +49,11 @@ if (!content && !embeds ) {
   
   if(embeds){
     embeds = JSON.parse(_.template(embeds)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
-     const includeCommits = core.getInput('includeCommits', { required: false });
-  
-    if(includeCommits){
-      if(!embeds.fields){ embeds.fields = []}
-      _.forEach(eventPayload.commits, function(commit){
-        embeds.fields.push({name:"["+commit.url+"]("+commit.sha+")", "value":commit.message})
-      })  
-    }
+
+    if(!embeds.fields){ embeds.fields = []}
+    _.forEach(eventPayload.commits, function(commit){
+      embeds.fields.push({name:"["+commit.url+"]("+commit.sha+")", "value":commit.message})
+    })  
   }
   
   console.log(JSON.stringify({content:content, embeds:embeds}))
