@@ -32,6 +32,8 @@ let payload;
 var content = core.getInput('content', { required: false });
 var embeds = core.getInput('embeds', { required: false });
 
+const eventPayload =  JSON.parse(eventContent)
+
 if (!content && !embeds ) {
   // If argument NOT provided, let Discord show the event informations.
   url = `${process.env.DISCORD_WEBHOOK}/github`;
@@ -42,11 +44,19 @@ if (!content && !embeds ) {
     console.log(JSON.stringify({content:content, embeds:embeds}))
 
   if(content){
-    content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
+    content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
   }
   
   if(embeds){
-    embeds = JSON.parse(_.template(embeds)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
+    embeds = JSON.parse(_.template(embeds)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
+     const includeCommits = core.getInput('includeCommits', { required: false });
+  
+    if(includeCommits){
+      if(!embeds.fields){ embeds.fields = []}
+      _.forEach(eventPayload.commits, function(commit){
+        embeds.fields.push({name:"["+commit.url+"]("+commit.sha+")", "value":commit.message})
+      })  
+    }
   }
   
   console.log(JSON.stringify({content:content, embeds:embeds}))
