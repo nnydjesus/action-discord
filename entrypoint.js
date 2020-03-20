@@ -47,7 +47,7 @@ if (!content && !embeds ) {
     embeds = JSON.parse(_.template(embeds)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
   }
   
-  console.log({content:content, embeds:embeds})
+  console.log(JSON.stringify({content:content, embeds:embeds}))
 
   url = process.env.DISCORD_WEBHOOK;
   payload = JSON.stringify({
