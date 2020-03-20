@@ -44,6 +44,8 @@ embed.title = _.template(core.getInput('title'))({ ...process.env, EVENT_PAYLOAD
 embed.description = _.template(core.getInput('description'))({ ...process.env, EVENT_PAYLOAD: eventPayload });
 embed.color = core.getInput('color');
 
+console.log({embed, n:1})
+
 if (core.getInput('author')) {
   embed.author = {
     name: eventPayload.sender.login,
@@ -52,10 +54,18 @@ if (core.getInput('author')) {
   }
 }
 
+console.log({embed, n:2})
+
 embed.fields = JSON.parse(_.template(core.getInput('fields'))({ ...process.env, EVENT_PAYLOAD: eventPayload }));
 
+console.log({embed, n:3})
+
 if (!embed.fields) { embed.fields = [] }
+
+console.log({embed, n:4})
+
 eventPayload.commits.forEach(commit => embed.fields.push({ name: "[" + commit.url + "](" + commit.sha + ")", "value": commit.message }))
+console.log({embed, n:5})
 
 console.log(JSON.stringify({ content: content, embed: embed }))
 
