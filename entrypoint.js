@@ -1,7 +1,6 @@
 const axios = require('axios');
 const fs = require('fs');
 const _ = require('lodash');
-const { argv } = require('yargs');
 const core = require('@actions/core');
 
 const REQUIRED_ENV_VARS = [
@@ -68,6 +67,7 @@ payload = JSON.stringify({
   ...process.env.DISCORD_AVATAR && { avatar_url: process.env.DISCORD_AVATAR },
 });
 
+console.log({payload:payload})
 // curl -X POST -H "Content-Type: application/json" --data "$(cat $GITHUB_EVENT_PATH)" $DISCORD_WEBHOOK/github
 
 (async () => {
