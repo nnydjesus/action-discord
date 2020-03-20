@@ -2,6 +2,7 @@ const axios = require('axios');
 const fs = require('fs');
 const _ = require('lodash');
 const { argv } = require('yargs');
+const core = require('@actions/core');
 
 const REQUIRED_ENV_VARS = [
   'GITHUB_EVENT_PATH',
@@ -35,8 +36,15 @@ if (argv._.length === 0) {
   payload = JSON.stringify(JSON.parse(eventContent));
 } else {
   // Otherwise, if the argument is provided, let Discord override the message.
-  const args = argv._.join(' ');
-  const message = JSON.parse(_.template(args)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
+  const content = core.getInput('content', { required: false });
+  const embeds = core.getInput('embeds', { required: false });
+  if(content){
+    content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
+  }
+  
+  if(content){
+    embeds = JSON.parse(_.template(embeds)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
+  }
 
   url = process.env.DISCORD_WEBHOOK;
   payload = JSON.stringify({
