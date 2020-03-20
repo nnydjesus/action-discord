@@ -38,6 +38,8 @@ if (!content && !embeds ) {
   payload = JSON.stringify(JSON.parse(eventContent));
 } else {
   // Otherwise, if the argument is provided, let Discord override the message.
+  
+    console.log(JSON.stringify({content:content, embeds:embeds}))
 
   if(content){
     content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
