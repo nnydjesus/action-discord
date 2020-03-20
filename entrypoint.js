@@ -29,15 +29,16 @@ _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 let url;
 let payload;
+const content = core.getInput('content', { required: false });
+const embeds = core.getInput('embeds', { required: false });
 
-if (argv._.length === 0) {
+if (!content && !embeds ) {
   // If argument NOT provided, let Discord show the event informations.
   url = `${process.env.DISCORD_WEBHOOK}/github`;
   payload = JSON.stringify(JSON.parse(eventContent));
 } else {
   // Otherwise, if the argument is provided, let Discord override the message.
-  const content = core.getInput('content', { required: false });
-  const embeds = core.getInput('embeds', { required: false });
+
   if(content){
     content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) }));
   }
