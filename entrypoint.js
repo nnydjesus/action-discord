@@ -29,8 +29,8 @@ _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 let url;
 let payload;
-const content = core.getInput('content', { required: false });
-const embeds = core.getInput('embeds', { required: false });
+var content = core.getInput('content', { required: false });
+var embeds = core.getInput('embeds', { required: false });
 
 if (!content && !embeds ) {
   // If argument NOT provided, let Discord show the event informations.
