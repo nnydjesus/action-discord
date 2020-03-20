@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 const _ = require('lodash');
-const core = require('@actions/core');
+const { argv } = require('yargs');
 
 const REQUIRED_ENV_VARS = [
   'GITHUB_EVENT_PATH',
@@ -23,53 +23,33 @@ REQUIRED_ENV_VARS.forEach(env => {
 });
 
 const eventContent = fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8');
-const eventPayload = JSON.parse(eventContent)
+
 _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 let url;
 let payload;
-var content = core.getInput('content', { required: false });
-console.log(JSON.stringify({ content: content }))
 
-if (content) {
-  content = JSON.parse(_.template(content)({ ...process.env, EVENT_PAYLOAD: eventPayload }));
+if (argv._.length === 0) {
+  // If argument NOT provided, let Discord show the event informations.
+  url = `${process.env.DISCORD_WEBHOOK}/github`;
+  payload = JSON.stringify(JSON.parse(eventContent));
+} else {
+  // Otherwise, if the argument is provided, let Discord override the message.
+  const args = argv._.join(' ');
+  const message = _.template(args)({ ...process.env, EVENT_PAYLOAD: JSON.parse(eventContent) });
+
+  url = process.env.DISCORD_WEBHOOK;
+  payload = JSON.stringify({
+    content: message,
+    ...process.env.DISCORD_USERNAME && { username: process.env.DISCORD_USERNAME },
+    ...process.env.DISCORD_AVATAR && { avatar_url: process.env.DISCORD_AVATAR },
+  });
 }
 
-var embed = {}
-
-embed.title = _.template(core.getInput('title'))({ ...process.env, EVENT_PAYLOAD: eventPayload });
-embed.description = _.template(core.getInput('description'))({ ...process.env, EVENT_PAYLOAD: eventPayload });
-embed.color = core.getInput('color');
-
-if (core.getInput('author')) {
-  embed.author = {
-    name: eventPayload.sender.login,
-    icon_url: eventPayload.sender.avatar_url,
-    url: eventPayload.sender.url
-  }
-}
-
-embed.fields = JSON.parse(_.template(core.getInput('fields'))({ ...process.env, EVENT_PAYLOAD: eventPayload }));
-if (!embed.fields) { embed.fields = [] }
-_.forEach(eventPayload.commits, function(commit) {
-  embed.fields.push({ name: "[" + commit.url + "](" + commit.sha + ")", "value": commit.message })
-})
-
-console.log(JSON.stringify({ content: content, embed: embed }))
-
-url = process.env.DISCORD_WEBHOOK;
-payload = JSON.stringify({
-  content: content,
-  embeds: [embed],
-  ...process.env.DISCORD_USERNAME && { username: process.env.DISCORD_USERNAME },
-  ...process.env.DISCORD_AVATAR && { avatar_url: process.env.DISCORD_AVATAR },
-});
-
-console.log({payload:payload})
 // curl -X POST -H "Content-Type: application/json" --data "$(cat $GITHUB_EVENT_PATH)" $DISCORD_WEBHOOK/github
 
 (async () => {
-  // console.log('Sending message ...');
+  console.log('Sending message ...');
   await axios.post(
     `${url}?wait=true`,
     payload,
@@ -80,10 +60,10 @@ console.log({payload:payload})
       },
     },
   );
-  // console.log('Message sent ! Shutting down ...');
+  console.log('Message sent ! Shutting down ...');
   process.exit(0);
 })().catch(err => {
-  // console.error('Error :', err.response.status, err.response.statusText);
-  // console.error('Message :', err.response ? err.response.data : err.message);
+  console.error('Error :', err.response.status, err.response.statusText);
+  console.error('Message :', err.response ? err.response.data : err.message);
   process.exit(1);
 });
