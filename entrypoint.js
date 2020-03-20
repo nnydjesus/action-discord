@@ -52,7 +52,7 @@ if (core.getInput('author')) {
 embed.fields = JSON.parse(_.template(core.getInput('fields'))({ ...process.env, EVENT_PAYLOAD: eventPayload }));
 if (!embed.fields) { embed.fields = [] }
 _.forEach(eventPayload.commits, function(commit) {
-  embed.fields.push({ name: "[" + commit.url + "](" + commit.sha + ")", "value": commit.message })
+  embed.fields.push({ name: commit.message, "value": "[" + commit.id + "](" + commit.url + ")" })
 })
 
 console.log(JSON.stringify({ content: content, embed: embed }))
