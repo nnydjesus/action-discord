@@ -23,15 +23,12 @@ REQUIRED_ENV_VARS.forEach(env => {
 });
 
 const eventContent = fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8');
-
+const eventPayload = JSON.parse(eventContent)
 _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 let url;
 let payload;
 var content = core.getInput('content', { required: false });
-
-const eventPayload = JSON.parse(eventContent)
-
 console.log(JSON.stringify({ content: content }))
 
 if (content) {
@@ -53,10 +50,7 @@ if (core.getInput('author')) {
 }
 
 embed.fields = JSON.parse(_.template(core.getInput('fields'))({ ...process.env, EVENT_PAYLOAD: eventPayload }));
-
 if (!embed.fields) { embed.fields = [] }
-
-
 _.forEach(eventPayload.commits, function(commit) {
   embed.fields.push({ name: "[" + commit.url + "](" + commit.sha + ")", "value": commit.message })
 })
@@ -89,7 +83,7 @@ console.log({payload:payload})
   // console.log('Message sent ! Shutting down ...');
   process.exit(0);
 })().catch(err => {
-  console.error('Error :', err.response.status, err.response.statusText);
-  console.error('Message :', err.response ? err.response.data : err.message);
+  // console.error('Error :', err.response.status, err.response.statusText);
+  // console.error('Message :', err.response ? err.response.data : err.message);
   process.exit(1);
 });
